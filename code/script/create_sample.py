@@ -15,6 +15,13 @@ def insert_to_data_set(image, label):
         labels_file.write(label.to_bytes(1, byteorder='big', signed=False))
 
 
+def read_img_and_label(index, crop_size):
+    image = np.memmap(f"{data_root_path}/data.bin",  dtype=np.uint8, mode='r', shape=crop_size,
+                        offset=crop_size[0]*crop_size[1]*crop_size[2]*index)
+    label = np.memmap(f"{data_root_path}/labels.bin", dtype=np.uint8, mode='r', shape=(1,), offset=index)
+    return image, label
+
+
 def is_tfl_divide(x_axis: np.ndarray, y_axis: np.ndarray, label: np.ndarray):
     x_true, y_true, x_false, y_false = [], [], [], []
     for x, y in zip(x_axis, y_axis):
