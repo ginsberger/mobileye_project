@@ -5,6 +5,13 @@ import numpy as np
 data_root_path = "data_dir/train"
 
 
+def insert_to_data_set(image, label):
+    with open(f"{data_root_path}/data.bin", "ab") as data_file:
+        np.array(image, dtype=np.uint8).tofile(data_file)
+    with open(f"{data_root_path}/labels.bin", "ab") as labels_file:
+        labels_file.write(label.to_bytes(1, byteorder='big', signed=False))
+
+
 def is_tfl_divide(x_axis: np.ndarray, y_axis: np.ndarray, label: np.ndarray):
     x_true, y_true, x_false, y_false = [], [], [], []
     for x, y in zip(x_axis, y_axis):
@@ -25,6 +32,11 @@ def crop_image(img: np.ndarray, x: int, y: int):
     cropped = padded_img[y: y+crop_size*2+1, x: x+crop_size*2+1]
     return cropped
 
+
+def crop_and_set(x_axis, y_axis, label, img):
+    for x, y in zip(x_axis, y_axis):
+        cropped_img = crop_image(img, x, y)
+        insert_to_data_set(cropped_img, label)
 
 
 
