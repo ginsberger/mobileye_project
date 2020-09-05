@@ -27,38 +27,6 @@ except ImportError:
 print("All imports okay. Yay!")
 
 
-def get_light_coordinate(c_image: np.ndarray):
-    
-    gray_image = cv2.cvtColor(c_image, cv2.COLOR_BGR2GRAY)
-    tophat_image = cv2.morphologyEx(c_image, cv2.MORPH_TOPHAT, kernel)
-    ret, thresh = cv2.threshold(tophat_image, 120, 255, cv2.THRESH_BINARY)
-    dist_transform = cv2.distanceTransform(thresh, cv2.DIST_L2, 5)
-    ret, markers = cv2.connectedComponents(np.uint8(dist_transform))
-    markers += 1
-    watershed_image = cv2.watershed(c_image, markers)
-    values, counts = np.unique(watershed_image, return_counts=True)
-    segment_indices = np.where(counts <= 500)
-    markers = values[segment_indices]
-    coordinates = []
-
-    for marker in markers:
-        y_coordinates, x_coordinates = np.where(watershed_image == marker)
-        coordinates.append((int(np.median(x_coordinates)), int(np.median(y_coordinates))))
-
-    red = [0,0,255]
-    for coordinate in coordinates:
-        cv2.circle(c_image, (coordinate[0],coordinate[1]), 3, red, -1)
-
-    cv2.imshow('Binary', thresh)
-    cv2.imshow('Marks', c_image)
-
-    if cv2.waitKey(0) & 0xff == 27:  
-        cv2.destroyAllWindows() 
-    
-    return coordinates
-
-
-
 
 def find_tfl_lights(c_image: np.ndarray, **kwargs):
     """
@@ -68,11 +36,55 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs):
     :return: 4-tuple of x_red, y_red, x_green, y_green
     """
 
-    coordinates = get_light_coordinate(c_image)
-    x = [coordinate[0] for coordinate in coordinates]
-    y_red = y_green = [coordinate[1] for coordinate in coordinates]
+def find_tfl_lights(c_image: np.ndarray, **kwargs):
+    green, red = c_image[:, :, 1], c_image[:, :, 0]
 
-    return x, y_red, x, y_green
+    red_kernel = np.array([[-0.5, 1, -0.5],
+                        [1, 1, 1],
+                        [1, 2, 1],
+                        [1, 1, 1],
+                        [-0.5, 1, -0.5],
+                        [-0.5, -0.5, -0.5],
+                        [-0.5, -0.5, -0.5],
+                        [-0.5, -0.5, -0.5],
+                        [-0.5, -0.5, -0.5],
+                        [-0.5, -0.5, -0.5]])
+
+    green_kernel = np.array([[-0.5, -0.5, -0.5],
+                       [-0.5, -0.5, -0.5],
+                       [-0.5, -0.5, -0.5],
+                       [-0.5, -0.5, -0.5],
+                       [-0.5, -0.5, -0.5],
+                        [-0.5, 1, -0.5],
+                        [1, 1, 1],
+                        [1, 2, 1],
+                        [1, 1, 1],
+                        [-0.5, 1, -0.5]])
+
+    red_result = sg.convolve2d(red, red_kernel, mode='same')
+    green_result = sg.convolve2d(green, green_kernel, mode='same')
+
+    max_red_dots = peak_local_max(red_result, min_distance=20, num_peaks=10)
+    max_green_dots = peak_local_max(green_result, min_distance=20, num_peaks=10)
+
+    x_red = max_red_dots[:, -1]
+    y_red = max_red_dots[:, 0]
+    x_green = max_green_dots[:, -1]
+    y_green = max_green_dots[:, 0]
+
+    red_ = [0,0,255]
+    for i in range(len(x_red)):
+        cv2.circle(c_image, (coordinate[0],coordinate[1]), 3, red_, -1)
+
+    plt.imshow(c_image)
+
+    red = [0,0,255]
+    for i in range(len(x_red)):
+        cv2.circle(c_image, (coordinate[0],coordinate[1]), 3, red, -1)
+
+    plt.imshow(c_image)
+
+    return x_red, y_red, x_green, y_green
 
 
 def show_image_and_gt(image, objs, fig_num=None):
