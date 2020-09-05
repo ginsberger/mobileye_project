@@ -1,5 +1,8 @@
 
 import numpy as np
+import os
+from find_tfl_lights import find_tfl_lights
+from image_data import ImagesData
 
 
 data_root_path = "data_dir/train"
@@ -39,4 +42,20 @@ def crop_and_set(x_axis, y_axis, label, img):
         insert_to_data_set(cropped_img, label)
 
 
+def build_dataset():
+    for city in os.listdir("data_/leftImg8bit/train"):
+        print(city)
+        count = 1
+        for img, label in ImagesData.images_and_labeled(city):
+            print(count)
+            x_red, y_red, x_green, y_green = find_tfl_lights(np.array(img))
+            x = np.append(x_red, x_green)
+            y = np.append(y_red, y_green)
+            x_true, y_true, x_false, y_false = is_tfl_divide(x, y, np.array(label))
+            min_size = min(len(x_true), len(x_false))
+            crop_and_set(x_true[:min_size], y_true[:min_size], 1, np.array(img))
+            crop_and_set(x_false[:min_size], y_false[:min_size], 0, np.array(img))
+            count += 1
 
+            
+build_dataset()
