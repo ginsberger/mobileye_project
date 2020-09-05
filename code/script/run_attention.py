@@ -45,6 +45,10 @@ def get_light_coordinate(c_image: np.ndarray):
         y_coordinates, x_coordinates = np.where(watershed_image == marker)
         coordinates.append((int(np.median(x_coordinates)), int(np.median(y_coordinates))))
 
+    red = [0,0,255]
+    for coordinate in coordinates:
+        cv2.circle(c_image, (coordinate[0],coordinate[1]), 3, red, -1)
+
     cv2.imshow('Binary', thresh)
     cv2.imshow('Marks', c_image)
 
@@ -52,6 +56,7 @@ def get_light_coordinate(c_image: np.ndarray):
         cv2.destroyAllWindows() 
     
     return coordinates
+
 
 
 
