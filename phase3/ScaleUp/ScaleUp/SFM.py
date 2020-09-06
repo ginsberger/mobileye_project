@@ -1,4 +1,5 @@
 import numpy as np
+from math import sqrt
 
 
 def calc_TFL_dist(prev_container, curr_container, focal, pp):
@@ -17,7 +18,7 @@ def calc_TFL_dist(prev_container, curr_container, focal, pp):
 def prepare_3D_data(prev_container, curr_container, focal, pp):
     norm_prev_pts = normalize(prev_container.traffic_light, focal, pp)
     norm_curr_pts = normalize(curr_container.traffic_light, focal, pp)
-    R, foe, tZ = decompose(np.array(curr_container))
+    R, foe, tZ = decompose(np.array(curr_container.EM))
     return norm_prev_pts, norm_curr_pts, R, foe, tZ
 
 
@@ -50,29 +51,61 @@ def normalize(pts, focal, pp):
 
 def unnormalize(pts, focal, pp):
     # transform normalized pixels into pixels using the focal length and principle point
-    pass
+    for pt in pts:
+        pt[0] = focal * pt[0] * pp[0]
+        pt[1] = focal * pt[1] * pp[1]
+
+    return pts
 
 
 def decompose(EM):
     # extract R, foe and tZ from the Ego Motion
     R = EM[:3, :3]
-    tZ = EM[3, 3]
-    foe = EM[3, :3]
+    T = EM[:3, 3]
+    tZ = T[2]
+    foe = [T[0]/tZ, T[1]/tZ]
 
     return R, foe, tZ
 
 
 def rotate(pts, R):
-    
     # rotate the points - pts using R
-    pass
+    for i in range(len(pts)):
+        normalizePt = [pts[i][0], pts[i][1], 1]
+        rotatePt = R.dot(normalizePt)
+        print(rotatePt)
+        print(pts[i][0] )
+        pts[i][0] = rotatePt[0] / rotatePt[2]
+        pts[i][1] = rotatePt[1] / rotatePt[2]
+
+    return pts
 
 
 def find_corresponding_points(p, norm_pts_rot, foe):
     # compute the epipolar line between p and foe
     # run over all norm_pts_rot and find the one closest to the epipolar line
     # return the closest point and its index
-    pass
+    m = (foe[1] - p[1]) / (foe[0] - p[0])
+    n = (p[1]*foe[0] - foe[1]*p[0]) / (foe[0] - p[0])
+
+    def epipolar_line(x):
+       return  m * x + n
+
+    def distance(y1, y2):
+        return abs( (y1 - y2) / sqrt(m*m + 1) )
+
+    minDiffrence = 100
+    minInd = 0
+    for inedx in range(len(norm_pts_rot)):
+        y = m * norm_pts_rot[inedx][0] + n
+        dis = distance(norm_pts_rot[inedx][1], y)
+
+        if dis < minDiffrence:
+            minDiffrence = dis
+            minInd = inedx
+
+    return minInd, norm_pts_rot[minInd]
+
 
 
 def calc_dist(p_curr, p_rot, foe, tZ):
