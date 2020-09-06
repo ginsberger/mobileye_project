@@ -41,7 +41,6 @@ def calc_3D_data(norm_prev_pts, norm_curr_pts, R, foe, tZ):
 
 def normalize(pts, focal, pp):
     # transform pixels into normalized pixels using the focal length and principle point
-
     for pt in pts:
         pt[0] = (pt[0] - pp[0]) / focal
         pt[1] = (pt[1] - pp[1]) / focal
@@ -56,10 +55,15 @@ def unnormalize(pts, focal, pp):
 
 def decompose(EM):
     # extract R, foe and tZ from the Ego Motion
-    pass
+    R = EM[:3, :3]
+    tZ = EM[3, 3]
+    foe = EM[3, :3]
+
+    return R, foe, tZ
 
 
 def rotate(pts, R):
+    
     # rotate the points - pts using R
     pass
 
