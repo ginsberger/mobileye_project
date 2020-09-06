@@ -73,8 +73,6 @@ def rotate(pts, R):
     for i in range(len(pts)):
         normalizePt = [pts[i][0], pts[i][1], 1]
         rotatePt = R.dot(normalizePt)
-        print(rotatePt)
-        print(pts[i][0] )
         pts[i][0] = rotatePt[0] / rotatePt[2]
         pts[i][1] = rotatePt[1] / rotatePt[2]
 
@@ -96,6 +94,7 @@ def find_corresponding_points(p, norm_pts_rot, foe):
 
     minDiffrence = 100
     minInd = 0
+
     for inedx in range(len(norm_pts_rot)):
         y = m * norm_pts_rot[inedx][0] + n
         dis = distance(norm_pts_rot[inedx][1], y)
@@ -112,4 +111,7 @@ def calc_dist(p_curr, p_rot, foe, tZ):
     # calculate the distance of p_curr using x_curr, x_rot, foe_x and tZ
     # calculate the distance of p_curr using y_curr, y_rot, foe_y and tZ
     # combine the two estimations and return estimated Z
-    pass
+    Zx = ( tZ * (foe[0] - p_rot[0]) ) / (p_curr[0] - p_rot[0])
+    Zy = ( tZ * (foe[1] - p_rot[1]) ) / (p_curr[1] - p_rot[1])
+
+    return Zx/2 + Zy/2
