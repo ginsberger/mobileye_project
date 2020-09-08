@@ -56,8 +56,11 @@ class TFLMan:
 
         return traffic_lights, auxilary
 
-    def __get_dists(self, prev_frame, current_frame, prev_traffic_lights, current_traffic_lights):
-        pass
+    @staticmethod
+    def __get_dists(prev_frame, current_frame, prev_traffic_lights, current_traffic_lights):
+        dist = [10.0 for traffic_light in current_traffic_lights]
+        print(dist)
+        return dist
 
 
 class FrameContainer(object):
