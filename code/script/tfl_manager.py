@@ -3,6 +3,8 @@ from numpy.random import randint
 from utils import Color
 import matplotlib.pyplot as plt
 from visualize_test import visualize
+import find_tfl_lights
+import cv2
 
 
 class TFLMan:
@@ -37,11 +39,7 @@ class TFLMan:
 
     @staticmethod
     def __get_candidates(image):
-        # get_tfl_light
-        x_red = randint(0, 1024, 4)
-        y_red = randint(0, 1024, 4)
-        x_green = randint(0, 1024, 4)
-        y_green = randint(0, 1024, 4)
+        x_red, y_red, x_green, y_green = find_tfl_lights.find_tfl_lights(cv2.imread(image))
 
         candidates = [[x_red[index], y_red[index]] for index in range(len(x_red))] + [[x_green[index], y_green[index]] for index in range(len(x_green))]
         auxilary = [Color.red for i in x_red] + [Color.green for i in x_green]
@@ -56,8 +54,10 @@ class TFLMan:
 
         return traffic_lights, auxilary
 
-    @staticmethod
-    def __get_dists(prev_frame, current_frame, prev_traffic_lights, current_traffic_lights):
+    def __get_dists(self, prev_frame, current_frame, prev_traffic_lights, current_traffic_lights):
+        # current_frame.traffic_light = current_traffic_lights
+        # current_frame.EM = self.__EMs[TFLMan.frame_number]
+
         dist = [10.0 for traffic_light in current_traffic_lights]
         print(dist)
         return dist
