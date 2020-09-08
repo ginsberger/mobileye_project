@@ -37,7 +37,16 @@ class TFLMan:
 
     @staticmethod
     def __get_candidates(image):
-        pass
+        # get_tfl_light
+        x_red = randint(0, 1024, 4)
+        y_red = randint(0, 1024, 4)
+        x_green = randint(0, 1024, 4)
+        y_green = randint(0, 1024, 4)
+
+        candidates = [[x_red[index], y_red[index]] for index in range(len(x_red))] + [[x_green[index], y_green[index]] for index in range(len(x_green))]
+        auxilary = [Color.red for i in x_red] + [Color.green for i in x_green]
+
+        return candidates, auxilary
 
     @staticmethod
     def __get_tfl_coordinates(image, candidates, auxilary):
