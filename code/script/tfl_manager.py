@@ -50,7 +50,11 @@ class TFLMan:
 
     @staticmethod
     def __get_tfl_coordinates(image, candidates, auxilary):
-        pass
+        traffic_lights_ind = randint(0, len(candidates), len(candidates)//2)
+        traffic_lights = [candidates[index] for index in range(len(candidates)) if index in traffic_lights_ind]
+        auxilary = [auxilary[index] for index in range(len(auxilary)) if index in traffic_lights_ind]
+
+        return traffic_lights, auxilary
 
     def __get_dists(self, prev_frame, current_frame, prev_traffic_lights, current_traffic_lights):
         pass
