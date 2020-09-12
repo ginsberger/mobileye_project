@@ -8,7 +8,6 @@ import cv2
 
 
 class TFLMan:
-    frame_number = 0
 
     def __init__(self, pkl_path):
         with open(pkl_path, 'rb') as pklfile:
@@ -19,7 +18,7 @@ class TFLMan:
         self.__focal = pkl_data['flx']
         self.__prev_frame = None
 
-    def on_frame(self, current_frame):
+    def on_frame(self, current_frame, frame_index):
         candidates, auxilary = self.__get_candidates(current_frame)
         traffic_lights, traffic_auxiliary = self.__get_tfl_coordinates(current_frame, candidates, auxilary)
 
@@ -32,7 +31,6 @@ class TFLMan:
             distance = None
             self.__prev_frame = current_frame
 
-        TFLMan.frame_number += 1
         visualize(current_frame, candidates, auxilary, traffic_lights, traffic_auxiliary, distance)
 
         return traffic_lights, traffic_auxiliary, distance
