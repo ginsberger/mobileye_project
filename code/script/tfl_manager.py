@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from visualize_test import visualize
 import find_tfl_lights
 import cv2
+from frame_container import FrameContainer
 
 
 class TFLMan:
@@ -59,13 +60,3 @@ class TFLMan:
         dist = [10.0 for traffic_light in current_traffic_lights]
         print(dist)
         return dist
-
-
-class FrameContainer(object):
-    def __init__(self, img_path):
-        self.img = plt.imread(img_path)
-        self.traffic_light = []
-        self.traffic_lights_3d_location = []
-        self.EM = []
-        self.corresponding_ind = []
-        self.valid = []
