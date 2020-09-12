@@ -6,6 +6,8 @@ from visualize_test import visualize
 import find_tfl_lights
 import cv2
 from frame_container import FrameContainer
+from create_sample import crop_image
+from tensorflow.keras.models import load_model
 
 
 class TFLMan:
@@ -18,6 +20,7 @@ class TFLMan:
         self.__pp = pkl_data['principle_point']
         self.__focal = pkl_data['flx']
         self.__prev_frame = None
+        self.__model = load_model("../../data/model.h5")
 
     def on_frame(self, current_frame, frame_index):
         candidates, auxilary = self.__get_candidates(current_frame)
@@ -45,13 +48,20 @@ class TFLMan:
 
         return candidates, auxilary
 
-    @staticmethod
-    def __get_tfl_coordinates(image, candidates, auxilary):
-        traffic_lights_ind = randint(0, len(candidates), len(candidates)//2)
-        traffic_lights = [candidates[index] for index in range(len(candidates)) if index in traffic_lights_ind]
-        auxilary = [auxilary[index] for index in range(len(auxilary)) if index in traffic_lights_ind]
+    def __get_tfl_coordinates(self, image, candidates, auxliary):
 
-        return traffic_lights, auxilary
+        crop_shape = (81, 81)
+        l_predicted_label = []
+
+        for candidate in candidates:
+            crop_img = crop_image(cv2.imread(image), candidate[0], candidate[1])
+            predictions = self.__model.predict(crop_img.reshape([-1]+list(crop_shape) +[3]))
+            l_predicted_label.append(1 if predictions[0][1] > 0.98 else 0)
+
+        traffic_lights = [candidates[index] for index in range(len(candidates)) if l_predicted_label[index] == 1]
+        auxliary =  [auxliary[index] for index in range(len(auxliary)) if l_predicted_label[index] == 1]
+
+        return traffic_lights, auxliary
 
     def __get_dists(self, prev_frame, current_frame, prev_traffic_lights, current_traffic_lights):
         # current_frame.traffic_light = current_traffic_lights
