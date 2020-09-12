@@ -1,9 +1,8 @@
-from controller import Controller
+import controller
 
 
 def main():
-    control = Controller(r"C:\Users\Lenovo\Documents\mobileye_project\data\frames.pls")
-    control.run()
+    controller.run()
 
 
 if __name__ == '__main__':
